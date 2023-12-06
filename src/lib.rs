@@ -1,3 +1,17 @@
+// Copyright 2023-2024 Joshua D. Rose
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     `<http://www.apache.org/licenses/LICENSE-2.0>`
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 //! Quick and easy command tooling in Rust 🦀
 //!
 //! Provides an opionated set of commands for Linux
@@ -10,20 +24,6 @@
 //! The commands contained herein are developed with the goal
 //! to make them as close to the real thing as possible, with a few
 //! tweaks here and there for developer experience.
-
-/// Copyright 2023-2024 Joshua D. Rose
-/// 
-/// Licensed under the Apache License, Version 2.0 (the "License");
-/// you may not use this file except in compliance with the License.
-/// You may obtain a copy of the License at
-/// 
-///     http://www.apache.org/licenses/LICENSE-2.0
-/// 
-/// Unless required by applicable law or agreed to in writing, software
-/// distributed under the License is distributed on an "AS IS" BASIS,
-/// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-/// See the License for the specific language governing permissions and
-/// limitations under the License.
 
 use std::os::linux::fs::MetadataExt;
 use std::fs::{self};
@@ -58,6 +58,14 @@ pub fn cd(directory: &str) -> Result<(), io::Error> {
 
     // chdir
     env::set_current_dir(path)
+}
+
+/// Get the current working directory
+///
+/// Returns an err if the current working directory is invalid
+pub fn cwd() -> String {
+    let path = std::env::current_dir().unwrap();
+    format!("{}", path.display())
 }
 
 /// Make a directory in the current folder
@@ -436,8 +444,26 @@ pub fn which(name: &str, index_bin: bool) -> Result<String, &str> {
 }
 
 /// Print the effective user name
-pub fn whoami() {
-    todo!()
+///
+/// This command calls the local command (so it essentially acts as a bind).
+/// With windows, it does the same thing as linux, would except with some minor variations.
+///
+/// ```no_run
+/// # use termease::whoami;
+/// assert_eq!(whoami(), "josh")  // NOTE: this fails in testing unless your user is //       called josh
+/// ```
+pub fn whoami() ->  String {
+    let output = if cfg!(target_os = "windows") {
+        Command::new("hostname")
+            .output()
+            .expect("failed to execute process")
+    } else {
+        Command::new("whoami")
+            .output()
+            .expect("failed to execute process")
+    };
+    let string = String::from_utf8(output.stdout).unwrap();
+    string
 }
 
 #[cfg(test)]
@@ -459,26 +485,33 @@ mod tests {
     #[test]
     fn test_chdir_backwards() {
         let old: Vec<PathBuf> = ls(".").unwrap();
+        let _ = cwd();
         let _ = cd("..");
         let new: Vec<PathBuf> = ls(".").unwrap();
-        assert_ne!(new, old)
+        assert_ne!(new, old);
+        // cd backwards once more
+        let _ = cd(cwd().as_str());
     }
 
     #[test]
     fn test_chdir_forwards() {
         let _ = if Path::new("test").exists() {
-            fs::remove_dir("test").unwrap();
+            fs::remove_dir_all("test").unwrap();
         };
         let old: Vec<PathBuf> = ls(".").unwrap();
-        let _ = mkdir("test");
-        let _ = cd("test");
+        let _ = if Path::new("test").exists() {
+            let _ = cd("test");
+        } else {
+            let _ = mkdir("test");
+            let _ = cd("test");
+        };
         let new: Vec<PathBuf> = ls(".").unwrap();
         assert_ne!(new, old);
         // cd backwards
         let _ = cd("..");
         // remove newly created folder
         let _ = if Path::new("test").exists() {
-            fs::remove_dir("test").unwrap();
+            fs::remove_dir_all("test").unwrap();
         };
     }
 
