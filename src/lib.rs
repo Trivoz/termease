@@ -1,3 +1,16 @@
+//! Quick and easy command tooling in Rust 🦀
+//!
+//! Provides an opionated set of commands for Linux
+//! A library that focuses on:
+//!
+//! - Simplicity
+//! - Speed
+//! - DX
+//!
+//! The commands contained herein are developed with the goal
+//! to make them as close to the real thing as possible, with a few
+//! tweaks here and there for developer experience.
+
 /// Copyright 2023-2024 Joshua D. Rose
 /// 
 /// Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,19 +24,6 @@
 /// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 /// See the License for the specific language governing permissions and
 /// limitations under the License.
-
-//! Quick and easy command tooling in Rust 🦀
-//!
-//! Provides an opionated set of commands for Linux
-//! A library that focuses on:
-//!
-//! - Simplicity
-//! - Speed
-//! - DX
-//!
-//! The commands contained herein are developed with the goal
-//! to make them as close to the real thing as possible, with a few
-//! tweaks here and there for developer experience.
 
 use std::os::linux::fs::MetadataExt;
 use std::fs::{self};
