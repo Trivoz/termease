@@ -5,7 +5,6 @@ name-template: 'v$RESOLVED_VERSION 🌈'
 tag-template: 'v$RESOLVED_VERSION'
 categories:
   - title: '⬆️ Dependencies'
-    collapse-after: 3
     labels:
       - 'dependencies'
   - title: '🚀 Features'
